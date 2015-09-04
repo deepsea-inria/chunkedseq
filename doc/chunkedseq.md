@@ -272,7 +272,7 @@ provides the methods that are specified in the following table.
 
 Table: Additional methods provided by the random-access iterator.
 
-### Iterator size  {#iterator-size}
+#### Iterator size  {#iterator-size}
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
 size_type size() const;
@@ -283,7 +283,7 @@ to by the iterator.
 
 ***Complexity.*** Constant time.
 
-### Search by predicate  {#iterator-search-by}
+#### Search by predicate  {#iterator-search-by}
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
 template <class Predicate>
@@ -296,7 +296,7 @@ cached measurement at position `i`.
 
 ***Complexity.*** Logarithmic time.
 
-### Get enclosing segment {#iterator-get-segment}
+#### Get enclosing segment {#iterator-get-segment}
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
 segment_type get_segment() const;
