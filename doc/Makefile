@@ -20,7 +20,7 @@ EXAMPLES := $(SOURCES:%.cpp=%.example) $(SOURCES:%.hpp=%.example)
 build: chunkedseq.html5 chunkedseq.pdf
 
 chunkedseq.html5: chunkedseq.md $(EXAMPLES)
-	pandoc --filter includes.hs chunkedseq.md --toc --number-sections -s -c chunkedseq.css -o chunkedseq.html5
+	pandoc --filter includes.hs chunkedseq.md --toc --number-sections -s -c chunkedseq.css -o chunkedseq.html
 
 chunkedseq.pdf: chunkedseq.md $(EXAMPLES)
 	pandoc --filter includes.hs chunkedseq.md --toc --number-sections -s -o chunkedseq.pdf
