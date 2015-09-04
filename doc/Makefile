@@ -15,7 +15,9 @@ SOURCES := $(shell find $(SOURCEDIR) -name '*.cpp') \
 	../include/algebra.hpp \
 	../examples/map_1.cpp \
 	../include/cachedmeasure.hpp
-EXAMPLES := $(SOURCES:%.cpp=%.example) $(SOURCES:%.hpp=%.example) 
+EXAMPLES := $(SOURCES:%.cpp=%.example) $(SOURCES:%.hpp=%.example)
+
+build: chunkedseq.html5 chunkedseq.pdf
 
 chunkedseq.html5: chunkedseq.md $(EXAMPLES)
 	pandoc --filter includes.hs chunkedseq.md --toc --number-sections -s -c chunkedseq.css -o chunkedseq.html5
@@ -23,5 +25,8 @@ chunkedseq.html5: chunkedseq.md $(EXAMPLES)
 chunkedseq.pdf: chunkedseq.md $(EXAMPLES)
 	pandoc --filter includes.hs chunkedseq.md --toc --number-sections -s -o chunkedseq.pdf
 
-clean:
-	rm -rf chunkedseq.html5 chunkedseq.pdf ../examples/*.example.* ../include/*.example.* ../examples/*.example ../include/*.example 
+clean_examples:
+	rm -f ../examples/*.example.* ../include/*.example.* ../examples/*.example ../include/*.example 
+
+clean: clean_examples
+	rm -f chunkedseq.html5 chunkedseq.pdf 

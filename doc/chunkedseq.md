@@ -43,6 +43,13 @@ Advanced features
 - [Segments](#segments)
 - [Derived data structures by cached measurement](#cached-measurement)
 
+Compatibility
+-------------
+
+This codebase makes extensive use of C++11 features, such as lambda
+expressions. Therefore, we recommend a recent version of GCC or
+Clang. We have tested the code on GCC v4.9.
+
 Credits
 -------
 
