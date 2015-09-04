@@ -22,13 +22,13 @@ namespace algebra {
 /***********************************************************************/
 
 /*---------------------------------------------------------------------*/
-//! [trivial]
 /*!
  * \class trivial
  * \ingroup algebras
  * \brief Trivial algebraic group whose sole element is a zero-byte structure
  *
  */
+//! [trivial]  
 class trivial {
 public:
   
@@ -52,13 +52,13 @@ public:
 //! [trivial]
   
 /*---------------------------------------------------------------------*/
-//! [int_group_under_addition_and_negation]
 /*!
  * \class int_group_under_addition_and_negation
  * \ingroup algebras
  * \brief Constructor for algebraic groups formed by integers along with sum and inverse operations
  * \tparam Int Type of the set of integers treated by the algebra
  */
+//! [int_group_under_addition_and_negation]  
 template <class Int>
 class int_group_under_addition_and_negation {
 public:
@@ -83,7 +83,6 @@ public:
 //! [int_group_under_addition_and_negation]
   
 /*---------------------------------------------------------------------*/
-//! [combiner]
 /*!
  * \class combiner
  * \ingroup algebras
@@ -101,6 +100,7 @@ public:
  * \tparam Algebra2 an algebra
  *
  */
+//! [combiner]  
 template <class Algebra1, class Algebra2>
 class combiner {
 public:

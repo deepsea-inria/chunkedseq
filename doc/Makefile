@@ -13,11 +13,15 @@ SOURCES := $(shell find $(SOURCEDIR) -name '*.cpp') \
 	../examples/map.hpp \
 	../include/segment.hpp \
 	../include/algebra.hpp \
+	../examples/map_1.cpp \
 	../include/cachedmeasure.hpp
 EXAMPLES := $(SOURCES:%.cpp=%.example) $(SOURCES:%.hpp=%.example) 
 
 chunkedseq.html5: chunkedseq.md $(EXAMPLES)
 	pandoc --filter includes.hs chunkedseq.md --toc --number-sections -s -c chunkedseq.css -o chunkedseq.html5
 
+chunkedseq.pdf: chunkedseq.md $(EXAMPLES)
+	pandoc --filter includes.hs chunkedseq.md --toc --number-sections -s -o chunkedseq.pdf
+
 clean:
-	rm -rf chunkedseq.html5 ../examples/*.example.* ../include/*.example.* ../examples/*.example ../include/*.example
+	rm -rf chunkedseq.html5 chunkedseq.pdf ../examples/*.example.* ../include/*.example.* ../examples/*.example ../include/*.example 

@@ -30,8 +30,9 @@ Provided container types
 ------------------------
 
 - [Double-ended queue](#deque)
-- Stack
-- Bag
+- [Stack](#stack)
+- [Bag](#bag)
+- [Associative map](#associative-map)
 
 Advanced features
 -----------------
@@ -40,7 +41,7 @@ Advanced features
 - [Weighted container](#weighted-container)
 - [STL-style iterator](#stl-iterator)
 - [Segments](#segments)
-- [Customized data structures by cached measurement](#cached-measurement)
+- [Derived data structures by cached measurement](#cached-measurement)
 
 Credits
 -------
@@ -62,9 +63,7 @@ namespace data {
 namespace chunkedseq {
 namespace bootstrapped {
 
-template <
-  class Item
->
+template <class Item>
 class deque;
 
 }}}}
@@ -102,7 +101,7 @@ template <
   class Chunk_struct = fixedcapacity::heap_allocated::ringbuffer_ptrx,
   class Item_alloc = std::allocator<Item>
 >
-using deque;
+class deque;
 
 }}}}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -201,6 +200,10 @@ Member types
 +-----------------------------------+-----------------------------------+
 | Type                              | Description                       |
 +===================================+===================================+
+| `self_type`                       | Alias for the type of this        |
+|                                   |container (e.g., `deque`, `stack`, |
+|                                   |`bag`)                             |
++-----------------------------------+-----------------------------------+
 | `value_type`                      | Alias for template parameter      |
 |                                   |`Item`                             |
 +-----------------------------------+-----------------------------------+
@@ -212,6 +215,23 @@ Member types
 +-----------------------------------+-----------------------------------+
 | `const_pointer`                   | Alias for `const value_type*`     |
 +-----------------------------------+-----------------------------------+
+| `size_type`                       | Alias for `size_t`                |
++-----------------------------------+-----------------------------------+
+| `segment_type`                    | Alias for                         |
+|                                   |`pasl::data::segment<pointer>`     |
++-----------------------------------+-----------------------------------+
+| `cache_type`                      | Alias for template parameter      |
+|                                   |`Cache`                            |
++-----------------------------------+-----------------------------------+
+| `measured_type`                   | Alias for                         |
+|                                   |`cache_type::measured_type`        |
++-----------------------------------+-----------------------------------+
+| `algebra_type`                    | Alias for                         |
+|                                   |`cache_type::algebra_type`         |
++-----------------------------------+-----------------------------------+
+| `measure_type`                    | Alias for                         |
+|                                   |`cache_type::measure_type`         |
++-----------------------------------+-----------------------------------+
 | [`iterator`](#deque-iter)         | Iterator                          |
 +-----------------------------------+-----------------------------------+
 | [`const_iterator`](#deque-iter)   | Const iterator                    |
@@ -221,10 +241,64 @@ Table: Member types of the `deque` class.
 
 ### Iterator {#deque-iter}
 
-The type `iterator` and `const_iterator` are instances of the
+The types `iterator` and `const_iterator` are instances of the
 [random-access
 iterator](http://en.cppreference.com/w/cpp/concept/RandomAccessIterator)
-concept.
+concept. In addition to providing standard methods, our iterator
+provides the methods that are specified in the following table.
+
++---------------------------------------+-----------------------------------+
+| Method                                | Description                       |
++=======================================+===================================+
+|[`size`](#iterator-size)               | Returns the number of preceding   |
+|                                       |items                              |
+|                                       |                                   |
++---------------------------------------+-----------------------------------+
+| [`search_by`](#iterator-search-by)    | Search to some position guided by |
+|                                       |a given predicate                  |
+|                                       |                                   |
++---------------------------------------+-----------------------------------+
+| [`get_segment`](#iterator-get-segment)| Returns the current segment       |
+|                                       |                                   |
+|                                       |                                   |
++---------------------------------------+-----------------------------------+
+
+Table: Additional methods provided by the random-access iterator.
+
+### Iterator size  {#iterator-size}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
+size_type size() const;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Returns the number of items preceding and including the item pointed
+to by the iterator.
+
+***Complexity.*** Constant time.
+
+### Search by predicate  {#iterator-search-by}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
+template <class Predicate>
+void search_by(const Predicate& p);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Moves the iterator to the first position `i` in the sequence for which
+the call `p(m_i)` returns `true`, where `m_i` denotes the accumulated
+cached measurement at position `i`.
+
+***Complexity.*** Logarithmic time.
+
+### Get enclosing segment {#iterator-get-segment}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
+segment_type get_segment() const;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Returns the segment that encloses the iterator.
+
+***Complexity.*** Constant time.
+
 
 Constructors and destructors
 ----------------------------
@@ -450,19 +524,25 @@ undefined behavior.
 +-------------------------------------+--------------------------------------+
 | Operation                           | Description                          |
 +=====================================+======================================+
-| [`push_front`](#deque-pushfrontback)| Adds items to the end.               |
+| [`push_front`](#deque-pushfrontback)| Adds items to the end                |
 | [`push_back`](#deque-pushfrontback) |                                      |
 +-------------------------------------+--------------------------------------+
-| [`pop_front`](#deque-popfrontback)  | Removes items from the end.          |
+| [`pop_front`](#deque-popfrontback)  | Removes items from the end           |
 |  [`pop_back`](#deque-popfrontback)  |                                      |
 +-------------------------------------+--------------------------------------+
-| [`clear`](#deque-clear)             | Erases contents.                     |
+| [`split`](#deque-split)             | Splits off part of the container     |
 |                                     |                                      |
 +-------------------------------------+--------------------------------------+
-| [`resize`](#deque-resize)           | Changes number of items stored.      |
+| [`concat`](#deque-concat)           | Merges contents of another container |
 |                                     |                                      |
 +-------------------------------------+--------------------------------------+
-| [`swap`](#deque-swap)               | Swaps contents.                      |
+| [`clear`](#deque-clear)             | Erases contents                      |
+|                                     |                                      |
++-------------------------------------+--------------------------------------+
+| [`resize`](#deque-resize)           | Changes number of items stored       |
+|                                     |                                      |
++-------------------------------------+--------------------------------------+
+| [`swap`](#deque-swap)               | Swaps contents                       |
 |                                     |                                      |
 +-------------------------------------+--------------------------------------+
 
@@ -493,7 +573,61 @@ Removes the last element of the container and returns the element.
 
 Calling `pop_back` or `pop_front` on an empty container is undefined.
 
+Returns the removed element.
+
 ***Complexity.*** Constant time.
+
+### Split {#deque-split}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
+void split(iterator position, self_type& other);    // (1)
+void split(size_type position, self_type& other);   // (2)
+template <class Predicate>
+void split(const Predicate& p, self_type& other);   // (3)
+template <class Predicate>
+void split(const Predicate& p,                      // (4)
+           reference middle_item,
+           self_type& other);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. The container is erased after and including the item at the
+specified position.
+
+2. The container is erased after and including the item at
+(zero-based) index `position`.
+
+3. The container is erased after and including the item at the first
+position `i` for which `p(m_i)` returns `true`, where `m_i` denotes
+the accumulated cached measurement at position `i`.
+
+4. The container is erased after the item at the first position `i`
+for which `p(m_i)` returns `true`, where `m_i` denotes the accumulated
+cached measurement at position `i`. The item at position `i` is also
+erased, but in this case, the item is copied into the reference
+`middle_item`.
+
+The erased items are moved to the other container.
+
+***Precondition.*** The `other` container is empty.
+
+***Complexity.*** Time is logarithmic in the size of the container.
+
+***Iterator validity.*** Invalidates all iterators.
+
+### Concatenate {#deque-concat}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
+void concat(self_type other);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Removes all items from `other`, effectively reducing its size to zero.
+
+Adds items removed from `other` to the back of this container, after its
+current last item.
+
+***Complexity.*** Time is logarithmic in the size of the container.
+
+***Iterator validity.*** Invalidates all iterators.
 
 ### Clear {#deque-clear}
 
@@ -527,6 +661,7 @@ its first `n` elements.
 If the current size is less than `n`,
 
 1. additional copies of `val` are appended
+
 2. additional default-inserted elements are appended
 
 ***Complexity.*** Let $m$ be the size of the container just before and
@@ -576,6 +711,207 @@ Example: split and concat
     Just after merge:
     contents of mydeque: 0 1 8888 9999 4 5
     contents of mydeque2:
+
+Stack {#stack}
+=====
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
+namespace pasl {
+namespace data {
+namespace chunkedseq {
+namespace bootstrapped {
+
+template <class Item>
+class stack;
+
+}}}}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The stack is a container that supports the same set of
+operations as the [deque](#deque), but has two key differences:
+
+- Thanks to using a simpler stack structure to represent the
+  chunks, the stack offers faster access to the back of the
+  container and faster indexing operations than deque.
+- Unlike deque, the stack cannot guarantee fast updates to
+  the front of the container: each update operation performed on
+  the front position can require at most `Chunk_capacity`
+  items to be shifted toward to back.
+
+Template interface
+------------------
+
+The complete template interface of the stack constructor is the same
+as that of the deque constructor, except that the chunk structure is
+not needed.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
+namespace pasl {
+namespace data {
+namespace chunkedseq {
+namespace bootstrapped {
+
+template <
+  class Item,
+  int Chunk_capacity = 512,
+  class Cache = cachedmeasure::trivial<Item, size_t>,
+  class Item_alloc = std::allocator<Item>
+>
+class stack;
+
+}}}}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example
+-------
+
+~~~~ {.cpp include="../examples/chunkedseq_3.example.stack_example"}
+~~~~
+
+[source](../examples/chunkedseq_3.cpp)
+
+***Output***
+
+    mystack contains: 4 3 2 1 0
+
+Bag {#bag}
+===
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
+namespace pasl {
+namespace data {
+namespace chunkedseq {
+namespace bootstrapped {
+
+template <class Item>
+class bagopt;
+
+}}}}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Our bag container is a generic container that trades the guarantee of
+order among its items for stronger guarantees on space usage and
+faster push and pop operations than the corresponding properties of
+the stack structure.  In particular, the bag guarantees that there are
+no empty spaces in between consecutive items of the sequence, whereas
+stack and deque can guarantee only that no more than half of the cells
+of the chunks are empty.
+
+Although our bag is unordered in general, in particular use cases,
+order among items is guaranteed.  Order of insertion and removal of
+the items is guaranteed by the bag under any sequence of push or pop
+operations that affect the back of the container.  The split and
+concatenation operations typically reorder items.
+
+The container supports `front`, `push_front` and `pop_front`
+operations for the sole purpose of interface compatibility.
+These operations simply perform the corresponding actions
+on the back of the container.
+
+Template interface
+------------------
+
+The complete template interface of the bag is similar to that of
+stack.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
+namespace pasl {
+namespace data {
+namespace chunkedseq {
+namespace bootstrapped {
+
+template <
+  class Item,
+  int Chunk_capacity = 512,
+  class Cache = cachedmeasure::trivial<Item, size_t>,
+  class Item_alloc = std::allocator<Item>
+>
+class bagopt;
+
+}}}}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example
+-------
+
+~~~~ {.cpp include="../examples/chunkedseq_4.example.bag_example"}
+~~~~
+
+[source](../examples/chunkedseq_4.cpp)
+
+***Output***
+
+    mybag contains: 4 3 2 1 0
+
+Associative map {#associative-map}
+===============
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
+namespace pasl {
+namespace data {
+namespace map {
+
+template <class Key,
+          class Item,
+          class Compare = std::less<Key>,
+          class Key_swap = std_swap<Key>,
+          class Alloc = std::allocator<std::pair<const Key, Item> >,
+          int chunk_capacity = 8
+>
+class map;
+
+}}}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using the [cached-measurement feature](#cached-measurement) of our
+chunked sequence structure, we have implemented asymptotically
+efficient associative maps in the style of [STL
+map](http://www.cplusplus.com/reference/map/map/). Our implementation
+is, however, not designed to compete with highly optimized
+implementations, such as that of STL. Rather, the main purpose of our
+implementation is to provide an example of advanced use of cached
+measurement so that others can apply similar techniques to build their
+own custom data structures.
+
+Our map interface implements only a subset of the [STL
+interface](http://www.cplusplus.com/reference/map/map/). The
+operations that we do implement have the same time and space
+complexity as do the operations implemented by the STL
+container. However, the constant factors imposed by our container may
+be significantly larger than those of the STL container because our
+structure is not specifically optimized for this use case.
+
+Example: `insert`
+-----------------
+
+~~~~ {.cpp include="../examples/map_1.example.map_example"}
+~~~~
+
+[source](../examples/map_1.cpp)
+
+
+***Output***
+
+    mymap['a'] is an element
+    mymap['b'] is another element
+    mymap['c'] is another element
+    mymap['d'] is 
+    mymap now contains 4 elements.
+
+Example: `erase`
+----------------
+
+~~~~ {.cpp include="../examples/map_2.example.map_example2"}
+~~~~
+
+[source](../examples/map_2.cpp)
+
+***Output***
+
+    f => 60
+    e => 50
+    d => 40
+    a => 10
 
 Parallel processing {#parallel-processing}
 ===================
@@ -726,15 +1062,6 @@ Example
 
     mydeque contains: 0 1 2 3 4
 
-Segment access
---------------
-
-As a bonus, the iterator classes support access to segments via the
-method 
-[get_segment](@ref pasl::data::chunkedseq::iterator::random_access::get_segment). 
-For more information on this operation, see the documentation on
-[segments](#segments).
-
 Segments {#segments}
 ======== 
 
@@ -787,7 +1114,7 @@ a [blog
 post](http://apfelmus.nfshost.com/articles/monoid-fingertree.html).
 
 In this tutorial, we present the key mechanism for building
-customized data structures: *monoid-cached measurement*.
+derived data structures: *monoid-cached measurement*.
 We show how to use monoid-cached measurements to implement a powerful
 form of split operation that affects chunkedseq containers.
 Using this split operation, we then show how to apply our
@@ -1126,14 +1453,16 @@ following are cached-measurement policies:
   cached-measurement policies is a group, we demote the group to a
   monoid and apply the pairing policy for two monoids
 
-\remark To save space, the chunkedseq structure can be instantiated
-with the nullary cached measurement alone. No space is taken by the
-cached measurements in this configuration because the nullary
-measurement takes zero bytes. However, the only operations supported
-in this configuration are push, pop, and concatenate. The size cached
-measurement is required by the indexing and split operations. The
-various instantiations of chunkedseq, namely deque, stack and bag all
-use the size measure for exactly this reason.
+Remark:
+
+> To save space, the chunkedseq structure can be instantiated with the
+> nullary cached measurement alone. No space is taken by the cached
+> measurements in this configuration because the nullary measurement
+> takes zero bytes. However, the only operations supported in this
+> configuration are push, pop, and concatenate. The size cached
+> measurement is required by the indexing and split operations. The
+> various instantiations of chunkedseq, namely deque, stack and bag
+> all use the size measure for exactly this reason.
 
 ### The cached-measurement descriptor
 
