@@ -12,6 +12,10 @@ What follows is a short guide to show you how to build one of the
 example programs. First, clone this repository.
 
     $ git clone https://github.com/deepsea-inria/chunkedseq.git
+    
+Now, go to the folder that contains the example programs.
+
+    $ cd chunkedseq/examples
 
 Then, build an example program.
 
