@@ -814,59 +814,43 @@ package.
 ### Measuring items individually
 
 A *measure function* is a function $m$ that is provided by the client;
-the function takes a single item and returns a 
-single measure value:
-
-
-$$[ \begin{array}{rcl}
-  m(s) & : & S \rightarrow T
-\end{array}
-$$
+the function takes a single item and returns a single measure value:
+$m(s) : S \rightarrow T$.
 
 ### Example: the "size" measure
-Suppose we want to use our measurement to represent the number of items
-that are stored in the container. We call this measure the *size measure*.
-The measure of any individual item always equals one:
-\f[
-\begin{array}{rclll}
-  \mathtt{size}(s) & : & S \rightarrow \mathtt{long} & = & 1
-\end{array}
-\f]
+
+Suppose we want to use our measurement to represent the number of
+items that are stored in the container. We call this measure the *size
+measure*.  The measure of any individual item always equals one:
+$\mathtt{size}(s) : S \rightarrow \mathtt{long} = 1$.
 
 ### Example: the "string-size" measure
+
 The string-size measurement assigns to each item the weight equal to
-the number of characters in the given string.
-\f[
-\begin{array}{rclll}
-  \mathtt{string\_size}(str) & : & \mathtt{string} \rightarrow \mathtt{long} & = & str.\mathtt{size}()
-\end{array}
-\f]
+the number of characters in the given string:
+$\mathtt{string\_size}(str) : \mathtt{string} \rightarrow
+\mathtt{long} = str.\mathtt{size}()$.
 
 ### Measuring items in contiguous regions of memory
 
-Sometimes it is convenient to have the ability to compute, all at once,
-the combined measure of a group of items that is referenced by a given
-"basic" [segment](@ref segments).
-For this reason, we require that, in addition to $m$, each measurement
-scheme provides a segment-wise measure operation, namely
-$\vec{m}$, which takes the pair of pointer arguments $begin$
-and $end$ which correspond to a basic segment, and returns
-a single measured value.
-
-\f[ \begin{array}{rcl}
-  \vec{m}(begin, end) & : & (S^\mathtt{*}, S^\mathtt{*}) \rightarrow T 
-\end{array} 
-\f]
+Sometimes it is convenient to have the ability to compute, all at
+once, the combined measure of a group of items that is referenced by a
+given "basic" [segment](@ref segments).  For this reason, we require
+that, in addition to $m$, each measurement scheme provides a
+segment-wise measure operation, namely $\mathbb{m}$, which takes the pair
+of pointer arguments $begin$ and $end$ which correspond to a basic
+segment, and returns a single measured value: $\mathbb{m}(begin, end) :
+(S^\mathtt{*}, S^\mathtt{*}) \rightarrow T$.
 
 The first and second arguments correspond to the range in memory
 defined by the segment $(begin, end]$.
-The value returned by $\vec{m}(begin, end)$ should equal the sum of the
+The value returned by $\mathbb{m}(begin, end)$ should equal the sum of the
 values $m(\mathtt{*}p)$ for each pointer $p$ in the range
 $(begin, end]$.
 
 #### Example: segmented version of our size measurement
 
-This operation is simply $\vec{m}(begin, end) = |end-begin|$, 
+This operation is simply $\mathbb{m}(begin, end) = |end-begin|$, 
 where our segment is defined by the sequence of items represented
 by the range of pointers $(begin, end]$.
 
@@ -887,7 +871,7 @@ And this interface exports definitions of the following methods:
 Members                                                                    | Description
 ---------------------------------------------------------------------------|------------------------------------------------
 `measured_type operator()(const value_type& v)`                            | returns $m(\mathtt{v})$
-`measured_type operator()(const value_type* begin, const value_type* end)` | returns $\vec{m}(\mathtt{begin}, \mathtt{end})$
+`measured_type operator()(const value_type* begin, const value_type* end)` | returns $\mathbb{m}(\mathtt{begin}, \mathtt{end})$
 
 #### Example: trivial measurement
 
@@ -1044,13 +1028,12 @@ chunkedseq at a given position.
 For convenience, we define scan formally as follows. The operator
 returns the combined measured values of the items in the range
 of positions $[i, j)$ in the given sequence $s$.
-\f[
-\begin{array}{rclr}
-  M_{i,j}    & : & \mathtt{Sequence}(S) \rightarrow T \\
-  M_{i,i}(s) & = & \mathbf{I} & \\
-  M_{i,j}(s) & = & \oplus_{k = i}^j m(s_k) & \mathrm{if} \, i < j 
-\end{array}
-\f]
+
+$M_{i,j}     :  \mathtt{Sequence}(S) \rightarrow T$
+
+$M_{i,i}(s)  =  \mathbf{I}$
+
+$M_{i,j}(s)  =  m(s_i) \oplus m(s_{i+1}) \oplus \ldots \oplus m(s_{j}) \, \mathrm{if} \, i < j$
 
 ### Why associativity is necessary
 
@@ -1116,25 +1099,25 @@ The cached-measurement policy binds both the measurement scheme and
 the algebra for a given instantiation of chunkedseq.  For example, the
 following are cached-measurement policies:
 
-- nullary cached measurement: $m(s) = \emptyset$; $\vec{m}(v) =
+- nullary cached measurement: $m(s) = \emptyset$; $\mathbb{m}(v) =
   \emptyset$; $A_T = (\mathcal{P}(\emptyset), \cup, \emptyset,
   \ominus )$, where $\ominus \emptyset = \emptyset$
-- size cached measurement: $m(s) = 1$; $\vec{m}(v) = |v|$; $A_T =
+- size cached measurement: $m(s) = 1$; $\mathbb{m}(v) = |v|$; $A_T =
   (\mathtt{long}, +, 0, \ominus )$
 - pairing policies (monoid): for any two cached-measurement
-  policies $m_1$; $\vec{m_1}$; $A_{T_1} = (T_1, \oplus_1,
-  \mathtt{I}_1)$ and $m_2$; $\vec{m_2}$; $A_{T_2} = (T_2, \oplus_2,
-  \mathtt{I}_2)$, $m(s_1, s_2) = (m_1(s_1), m_2(s_2))$; $\vec{m}(v_1,
-  v_2) = (\vec{m_1}(v_1), \vec{m_2}(v_2))$; $A = (T_1 \times T_2,
+  policies $m_1$; $\mathbb{m_1}$; $A_{T_1} = (T_1, \oplus_1,
+  \mathtt{I}_1)$ and $m_2$; $\mathbb{m_2}$; $A_{T_2} = (T_2, \oplus_2,
+  \mathtt{I}_2)$, $m(s_1, s_2) = (m_1(s_1), m_2(s_2))$; $\mathbb{m}(v_1,
+  v_2) = (\mathbb{m_1}(v_1), \mathbb{m_2}(v_2))$; $A = (T_1 \times T_2,
   \oplus, (\mathtt{I}_1, \mathtt{I}_2))$ is also a cached-measurement
   policy, where $(x_1, x_2) \oplus (y_1, y_2) = (x_1 \oplus y_1, x_2
   \oplus y_2)$
 - pairing policies (group): for any two cached-measurement
-  policies $m_1$; $\vec{m_1}$; $A_{T_1} = (T_1, \oplus_1,
-  \mathtt{I}_1, \ominus_1)$ and $m_2$; $\vec{m_2}$; $A_{T_2} =
+  policies $m_1$; $\mathbb{m_1}$; $A_{T_1} = (T_1, \oplus_1,
+  \mathtt{I}_1, \ominus_1)$ and $m_2$; $\mathbb{m_2}$; $A_{T_2} =
   (T_2, \oplus_2, \mathtt{I}_2, \ominus_2)$, $m(s_1, s_2) =
-  (m_1(s_1), m_2(s_2))$; $\vec{m}(v_1, v_2) = (\vec{m_1}(v_1),
-  \vec{m_2}(v_2))$; $A = (T_1 \times T_2, \oplus, (\mathtt{I}_1,
+  (m_1(s_1), m_2(s_2))$; $\mathbb{m}(v_1, v_2) = (\mathbb{m_1}(v_1),
+  \mathbb{m_2}(v_2))$; $A = (T_1 \times T_2, \oplus, (\mathtt{I}_1,
   \mathtt{I}_2), \ominus)$ is also a cached-measurement policy,
   where $(x_1, x_2) \oplus (y_1, y_2) = (x_1 \oplus y_1, x_2 \oplus
   y_2)$ and $\ominus(x_1, x_2) = (\ominus_1 x_1,
@@ -1233,12 +1216,9 @@ That job is the job of the internals of the chunkedseq class; the
 client is responsible only to provide the predicate function that is
 used by the search process.
 Formally, a predicate function is simply a function $p$ which 
-takes a measured value and returns either `true` or `false`.
-$$
-\begin{array}{rcl}
-  p(m) & : & T \rightarrow \mathtt{bool}
-\end{array}
-$$
+takes a measured value and returns either `true` or `false`:
+$p(m) : T \rightarrow \mathtt{bool}$.
+
 The search process guarantees that the position at which the split
 occurs is the position $i$ in the target sequence, $s = [v_1,
 \ldots, v_i, \ldots v_n]$, at which the value returned by
@@ -1258,50 +1238,44 @@ Members                             | Description
 ### Example: weighted splits
 
 Let us first consider the small example which is given already for the
-[weighted container](@ref weighted_container).
-The action performed by the example program is to divide a given
-sequence of strings so that the first piece of the split contains
-approximately half of the even-length strings and the second piece the
-second half.
-In our example code (see the page linked above), we assign to each
-item a certain weight, which is defined formally as follows: if the
-length of the given string is an even number, return a 1; else, return
-a 0.
-\f[
-\begin{array}{rcccl}
- m(str) & : & \mathtt{string} \rightarrow \mathtt{int} & = & \left\{ 
-  \begin{array}{l l}
-    1 & \quad \mathrm{if}\, str.\mathtt{size()}\, \mathrm{is\, an\, even\, number}\\
-    0 & \quad \mathrm{otherwise}
-  \end{array} \right.
-\end{array}
-\f]
+[weighted container](@ref weighted_container).  The action performed
+by the example program is to divide a given sequence of strings so
+that the first piece of the split contains approximately half of the
+even-length strings and the second piece the second half.  In our
+example code (see the page linked above), we assign to each item a
+certain weight as follows: if the length of the given string is an
+even number, return a 1; else, return a 0.
+
+$m(str) : \mathtt{string} \rightarrow \mathtt{int} = 1 \, \mathrm{if}\, str.\mathtt{size()}\, \mathrm{is\, an\, even\, number\, and\, } 0 \, \mathrm{otherwise}$
+
 Let $n$ denote the number of even-length strings in our source
-sequence.
-Then, the following predicate function delivers the exact split that
-we want.
-\f[
-\begin{array}{rcccl}
-  p(m) & : & int \rightarrow \mathtt{bool} & = & m \geq n/2
-\end{array}
-\f]
-Let $s$ denote the sequence of strings (i.e., `["Let's", "divide",
-"this", "string", "into", "two", "pieces"]` that we want to split.
-The following table shows the logical states of the split process.
+sequence.  Then, the following predicate function delivers the exact
+split that we want: $p(m) : int \rightarrow \mathtt{bool} = m \geq
+n/2$.  Let $s$ denote the sequence of strings (i.e., `["Let's",
+"divide", "this", "string", "into", "two", "pieces"]` that we want to
+split.  The following table shows the logical states of the split
+process.
 
-         $i$               | 0       | 1        | 2       | 3        | 4      | 5      | 6        |
----------------------------|---------|----------|---------|----------|--------|--------|----------|
-$v_i$                      | `Let's` | `divide` | `this`  | `string` | `into` | `two`  | `pieces` |
-$m(v_i)$                   | 0       | 1        | 1       | 1        | 1      | 0      | 1        |
-$M_{0,i}(s)$               | 0       | 1        | 2       | 3        | 4      | 4      | 5        |
-$p(M_{0,i}(s))$            | `false` | `false`  | `false` | `true`   | `true` | `true` | `true`   |
++---------------+-------+--------+-------+--------+-------+------+--------+
+| $i$           | 0     | 1      |2      |3       |4      |5     |6       |
++===============+=======+========+=======+========+=======+======+========+
+| $v_i$         |`Let's`|`divide`|`this` |`string`| `into`|`two` |`pieces`|
++---------------+-------+--------+-------+--------+-------+------+--------+
+|$m(v_i)$       |0      |1       |1      |1       |1      |0     |1       |
++---------------+-------+--------+-------+--------+-------+------+--------+
+|$M_{0,i}(s)$   |0      |1       |2      |3       |4      |4     |5       |
++---------------+-------+--------+-------+--------+-------+------+--------+
+|$p(M_{0,i}(s))$|`false`|`false` |`false`|`true`  |`true` |`true`|`true`  |
++---------------+-------+--------+-------+--------+-------+------+--------+
 
-\remark Even though the search process might look like a linear
-search, the process in fact takes just logarithmic time in the number
-of items in the sequence.  The logarithmic time bound is possible
-thanks to the fact that internal nodes of the chunkedseq tree (which
-is itself a tree whose height is logarithmic in the number of items)
-are annotated by partial sums of weights.
+Remark:
+
+> Even though the search process might look like a linear search, the
+> process in fact takes just logarithmic time in the number of items in
+> the sequence.  The logarithmic time bound is possible thanks to the
+> fact that internal nodes of the chunkedseq tree (which is itself a
+> tree whose height is logarithmic in the number of items) are annotated
+> by partial sums of weights.
 
 Example: using cached measurement to implement associative maps
 ---------------------------------------------------------------
