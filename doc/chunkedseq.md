@@ -484,12 +484,6 @@ Iterators
 +----------------------------+--------------------------------------+
 | Operation                  | Description                          |
 +============================+======================================+
-| [`front`](#deque-frontback)| Access item on end.                  |
-| [`back`](#deque-frontback) |                                      |
-+----------------------------+--------------------------------------+
-|[`operator[]`](#deque-i-o)  | Access member item                   |
-|                            |                                      |
-+----------------------------+--------------------------------------+
 | [`begin`](#deque-beg)      | Returns an iterator to the beginning |
 | [`cbegin`](#deque-beg)     |                                      |
 +----------------------------+--------------------------------------+
@@ -527,6 +521,9 @@ This element acts as a placeholder; attempting to access it results in
 undefined behavior.
 
 ***Complexity.*** Constant time.
+
+Modifiers
+---------
 
 +-------------------------------------+--------------------------------------+
 | Operation                           | Description                          |
@@ -678,7 +675,7 @@ If the current size is less than `n`,
 ***Iterator validity.*** Invalidates all iterators, if the size before
    the operation differs from the size after.
 
-### Exchange operation {#deque-swap}
+### Exchange contents {#deque-swap}
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.cpp}
 void swap(deque& other);
@@ -1308,12 +1305,12 @@ We require that the descriptor export the following members. If
 `has_inverse` is false, then it should be safe to assume that the
 `inverse(x)` operation is never called.
 
-Static members                                 | Description
------------------------------------------------|-----------------------------------
-const bool has_inverse                         | `true`, iff the algebra is a group
-value_type identity()                          | returns $\mathbf{I}$
-value_type combine(value_type x, value_type y) | returns `x` $\oplus$ `y`
-value_type inverse(value_type x)               | returns $\ominus$ `x`
+Static members                                   | Description
+-------------------------------------------------|-----------------------------------
+`const bool has_inverse`                         | `true`, iff the algebra is a group
+`value_type identity()`                          | returns $\mathbf{I}$
+`value_type combine(value_type x, value_type y)` | returns `x` $\oplus$ `y`
+`value_type inverse(value_type x)`               | returns $\ominus$ `x`
 
 #### Example: trivial algebra
 

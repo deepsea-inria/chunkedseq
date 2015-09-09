@@ -25,6 +25,12 @@ chunkedseq.html5: chunkedseq.md $(EXAMPLES)
 chunkedseq.pdf: chunkedseq.md $(EXAMPLES)
 	pandoc --filter includes.hs chunkedseq.md --toc --number-sections -s -o chunkedseq.pdf
 
+WEB=~/Work/deepsea-web/chunkedseq/
+
+publish: chunkedseq.html5 chunkedseq.pdf
+	cp chunkedseq.html chunkedseq.pdf chunkedseq.css $(WEB)/doc
+	(cd $(WEB) && make publish)
+
 clean_examples:
 	rm -f ../examples/*.example.* ../include/*.example.* ../examples/*.example ../include/*.example 
 
