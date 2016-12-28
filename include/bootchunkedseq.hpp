@@ -1,9 +1,8 @@
 /*!
- * \author Umut A. Acar
- * \author Arthur Chargueraud
- * \author Mike Rainey
- * \date 2013-2018
- * \copyright 2014 Umut A. Acar, Arthur Chargueraud, Mike Rainey
+ * Copyright (c) 2015 Umut A. Acar, Arthur Chargueraud, and Mike Rainey
+ * 
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
  *
  * \brief Representation of a chunk
  * \file bootchunkedseq.hpp
