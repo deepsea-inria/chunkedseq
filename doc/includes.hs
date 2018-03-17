@@ -1,5 +1,3 @@
-#!/usr/bin/env runhaskell
--- includes.hs
 import Text.Pandoc.JSON
 
 doInclude :: Block -> IO Block

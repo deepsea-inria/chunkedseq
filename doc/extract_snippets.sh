@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # This script extracts from a specified C++ file all ranges of source
 # lines that occur between Doxygen code-snippet delimiters. For
