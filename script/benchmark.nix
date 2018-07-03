@@ -4,6 +4,7 @@
   gperftools ? pkgs.gperftools,
   gcc ? pkgs.gcc,
   php ? pkgs.php,
+  sc15-pdfs ? import ../../sc15-pdfs/script/default.nix { },
   buildDocs ? false
 }:
 
@@ -23,7 +24,6 @@ let
     pbench = callPackage "${sources.pbenchSrc}/script/default.nix" { };
     cmdline = callPackage "${sources.cmdlineSrc}/script/default.nix" { };
     chunkedseq = callPackage "${sources.chunkedseqSrc}/script/default.nix" { };
-    sc15-pdfs = callPackage "${sources.sc15pdfs}/script/default.nix" { };
 
   };
 
@@ -81,6 +81,7 @@ stdenv.mkDerivation rec {
        --prefix PATH ":" $out/bench \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib64 \
+       --prefix PATH ":" ${sc15-pdfs}/bench
     ${doc}
     '';
 
