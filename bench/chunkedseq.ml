@@ -63,7 +63,7 @@ let file_tables exp_name =
   Printf.sprintf "tables_%s.pdf" exp_name
 
 let ipfs_get hash outfile is_virtual =
-  system (sprintf "wget -O %s https://ipfs.io/ipfs/%s" outfile hash) 
+  system (sprintf "wget -O %s https://ipfs.io/ipfs/%s" outfile hash) is_virtual
 
 let ipfs_get_if_needed hash outfile force_get is_virtual =
   if not(is_virtual) && (force_get || not (Sys.file_exists outfile)) then
@@ -88,6 +88,7 @@ let row_of_infile name =
   (h, path_of_graphname name)
 
 let download_all_graphs () =
+  let _ = system (sprintf "mkdir -p %s" arg_path_to_data) arg_virtual_run in
   let graphnames = List.map (fun (_,n) -> n) hashes_of_graphs in
   let table = List.map row_of_infile graphnames in
   ipfs_get_files table arg_force_get arg_virtual_run
