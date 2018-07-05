@@ -17,7 +17,9 @@ let arg_path_to_pasl = XCmd.parse_or_default_string "path_to_pasl" "../"
 let arg_mode = Mk_runs.mode_from_command_line "mode"
 let arg_top_pct = XCmd.parse_or_default_float "top_pct" 0.10
 let arg_nb_runs = XCmd.parse_or_default_int "runs" 1
-                
+let arg_path_to_data = XCmd.parse_or_default_string "path_to_data" "_data"
+let arg_force_get = XCmd.mem_flag "force_get"
+                  
 let run_modes =
   Mk_runs.([
     Mode arg_mode;
@@ -60,6 +62,36 @@ let file_tables_src exp_name =
 let file_tables exp_name =
   Printf.sprintf "tables_%s.pdf" exp_name
 
+let ipfs_get hash outfile is_virtual =
+  system (sprintf "wget -O %s https://ipfs.io/ipfs/%s" outfile hash) 
+
+let ipfs_get_if_needed hash outfile force_get is_virtual =
+  if not(is_virtual) && (force_get || not (Sys.file_exists outfile)) then
+    (ipfs_get hash outfile is_virtual; ())
+  else
+    ()
+
+let ipfs_get_files table force_get is_virtual =
+  List.iter (fun (h, p) -> ipfs_get_if_needed h p force_get is_virtual) table
+
+let hashes_of_graphs = [
+    "QmaroxYoU5sJBVuhmZ51UttBfJpLuZ7yUDpXqNapfoUSkd", "grid_sq_large.bin";
+    "QmWLc6h7MqwbpzFVvrgWrhzpEuhnxdHfEfcW8sc92ddePv", "friendster.adj_bin";
+    "QmVhDx27NZZfEsxCY1PibwixRtBLMX1BvENy8L8nsiHLMk", "perfect_bintree.adj_bin";
+]
+
+let path_of_graphname n =
+  sprintf "%s/%s.adj_bin" arg_path_to_data n
+
+let row_of_infile name =
+  let h, _ = List.find (fun (_, n) -> n = name) hashes_of_graphs in
+  (h, path_of_graphname name)
+
+let download_all_graphs () =
+  let graphnames = List.map (fun (_,n) -> n) hashes_of_graphs in
+  let table = List.map row_of_infile graphnames in
+  ipfs_get_files table arg_force_get arg_virtual_run
+  
 (*****************************************************************************)
 (** Chart formatters *)
 
@@ -767,7 +799,7 @@ let emit_table_rows add results =
 let plot() =
    build_chunkedseq_table name emit_table_rows
 
-let all () = select make run nothing plot
+let all () = (download_all_graphs(); select make run nothing plot)
 
 end
 
@@ -809,7 +841,7 @@ let emit_table_rows add results =
 let plot() =
    build_chunkedseq_table name emit_table_rows
 
-let all () = select make run nothing plot
+let all () = (download_all_graphs(); select make run nothing plot)
 
 end
 
