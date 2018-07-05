@@ -81,7 +81,8 @@ stdenv.mkDerivation rec {
        --prefix PATH ":" $out/bench \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib64 \
-       --prefix PATH ":" ${sc15-pdfs}/bench
+       --prefix PATH ":" ${sc15-pdfs}/bench \
+       --add-flags "-skip make"
     ${doc}
     '';
 
