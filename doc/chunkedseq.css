@@ -2,10 +2,10 @@ body {
     margin: auto;
     padding-right: 1em;
     padding-left: 1em;
-    max-width: 42em; 
+    max-width: 40em; 
 }
 pre {
-    border: 1px dotted gray;
+border: 1px dotted gray;
     color: #1111111;
     padding: 0.5em;
 }
@@ -64,13 +64,25 @@ dd p {
         margin-top: 0;
 }
 
+h1.title {
+        font-size: 250%;
+        text-align: center;
+        border: none;
+}
 
+.author {
+  font-size: 1.2em;
+  text-align: center;
+}
+
+.date {
+        font-size: 100%;
+        text-align: center;
+        border: none;
+}
 
 table {
-    width: 100%;
-    padding-top:    0.2em;
-    padding-bottom: 1.2em;
-    border: 1px dashed black;
+    width: 100%; 
 }
 
 td, th { 
@@ -80,5 +92,4 @@ td, th {
     padding-right:  0.5em;
     padding-top:    0.2em;
     padding-bottom: 0.2em;
-    border: 1px solid black;
 }

@@ -1,7 +1,7 @@
 { pkgs   ? import <nixpkgs> {},
   stdenv ? pkgs.stdenv,
   chunkedseqSrc ? ../.,
-  buildDocs ? false
+  buildDocs ? true
 }:
 
 stdenv.mkDerivation rec {
@@ -18,7 +18,7 @@ stdenv.mkDerivation rec {
       [];
 
   buildPhase = if buildDocs then ''
-      make -C doc chunkedseq.pdf chunkedseq.html
+      make -C doc chunkedseq.pdf chunkedseq.html -j
     '' else "";
 
   installPhase =
