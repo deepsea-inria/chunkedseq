@@ -1,7 +1,7 @@
 { pkgs   ? import <nixpkgs> {},
   stdenv ? pkgs.stdenv,
   chunkedseqSrc ? ../.,
-  buildDocs ? true
+  buildDocs ? false
 }:
 
 stdenv.mkDerivation rec {
