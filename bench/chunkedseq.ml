@@ -889,7 +889,7 @@ let _ =
   ] in
   let selected ks =
      ~~ List.iter bindings (fun (k,f) -> if List.mem k ks then f()) in
-  let paper () = selected [  "generate"; "fifo"; "lifo"; "chunk_size"; "split_merge"; 
+  let paper () = selected [  (*"generate";*) "fifo"; "lifo"; "chunk_size"; "split_merge"; 
                              "filter"; "dfs"; "bfs"; "pbfs"; "report"; ] in
   Pbench.execute_from_only_skip arg_actions [] (bindings @ [
      "paper", paper;
