@@ -32,6 +32,7 @@ stdenv.mkDerivation rec {
     ''
     mkdir -p $out/include/
     cp include/*.hpp $out/include
+    cp -r examples $out/
     ${doc}
     '';
 
