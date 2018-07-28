@@ -63,10 +63,10 @@ let file_tables exp_name =
   Printf.sprintf "tables_%s.pdf" exp_name
 
 let ipfs_get hash outfile is_virtual =
-  system (sprintf "wget -O %s https://ipfs.io/ipfs/%s" outfile hash) is_virtual
+  system (sprintf "ipget -o %s %s" outfile hash) is_virtual
 
 let ipfs_get_if_needed hash outfile force_get is_virtual =
-  if not(is_virtual) && (force_get || not (Sys.file_exists outfile)) then
+  if (force_get || not (Sys.file_exists outfile)) then
     (ipfs_get hash outfile is_virtual; ())
   else
     ()
@@ -75,13 +75,13 @@ let ipfs_get_files table force_get is_virtual =
   List.iter (fun (h, p) -> ipfs_get_if_needed h p force_get is_virtual) table
 
 let hashes_of_graphs = [
-    "QmaroxYoU5sJBVuhmZ51UttBfJpLuZ7yUDpXqNapfoUSkd", "grid_sq_large.bin";
+    "QmaroxYoU5sJBVuhmZ51UttBfJpLuZ7yUDpXqNapfoUSkd", "square_grid.adj_bin";
     "QmWLc6h7MqwbpzFVvrgWrhzpEuhnxdHfEfcW8sc92ddePv", "friendster.adj_bin";
     "QmVhDx27NZZfEsxCY1PibwixRtBLMX1BvENy8L8nsiHLMk", "perfect_bintree.adj_bin";
 ]
 
 let path_of_graphname n =
-  sprintf "%s/%s.adj_bin" arg_path_to_data n
+  sprintf "%s/%s" arg_path_to_data n
 
 let row_of_infile name =
   let h, _ = List.find (fun (_, n) -> n = name) hashes_of_graphs in

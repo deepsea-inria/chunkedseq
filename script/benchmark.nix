@@ -77,7 +77,7 @@ stdenv.mkDerivation rec {
        --prefix PATH ":" ${pkgs.texlive.combined.scheme-small}/bin \
        --prefix PATH ":" ${gcc}/bin \
        --prefix PATH ":" ${php}/bin \
-       --prefix PATH ":" ${pkgs.wget}/bin \
+       --prefix PATH ":" ${pkgs.ipget}/bin \
        --prefix PATH ":" $out/bench \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib64 \
