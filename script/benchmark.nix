@@ -1,6 +1,6 @@
 { pkgs   ? import <nixpkgs> {},
   stdenv ? pkgs.stdenv,
-  sources ? import ./local-sources.nix,
+  sources ? import ./default-sources.nix,
   gperftools ? pkgs.gperftools,
   gcc ? pkgs.gcc,
   php ? pkgs.php,
@@ -15,7 +15,6 @@ let
   self = {
 
     gperftools = gperftools;
-
     gcc = gcc;
     php = php;
 
